@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express, { type NextFunction, type Request, type Response } from "express";
@@ -10,6 +11,9 @@ import {
   TranslationSchema,
 } from "../src/lib/schema.ts";
 import { analyzePrompt, symptomPrompt, translatePrompt } from "../src/lib/prompts.ts";
+
+// Read ANTHROPIC_API_KEY (and friends) from a local .env file if there is one.
+if (existsSync(".env")) process.loadEnvFile(".env");
 
 const PORT = Number(process.env.PORT ?? 8787);
 const MODEL = process.env.LIFTOFF_MODEL ?? "claude-opus-5-5";

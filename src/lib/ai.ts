@@ -113,6 +113,31 @@ async function viaServer<T>(path: string, body: unknown, parse: (v: unknown) => 
   return parse(await res.json());
 }
 
+// Phone photos are often larger than the API accepts. Claude reads images up
+// to 2576 px on the long edge, so scale down to that and re-encode as JPEG.
+const MAX_EDGE = 2576;
+const MAX_BYTES = 4_500_000;
+
+async function shrinkPhoto(photo: Blob): Promise<Blob> {
+  const bitmap = await createImageBitmap(photo);
+  const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
+  if (scale === 1 && photo.size <= MAX_BYTES && /^image\/(jpeg|png|webp)$/.test(photo.type)) {
+    bitmap.close();
+    return photo;
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const encode = (quality: number) =>
+    new Promise<Blob>((resolve, reject) =>
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Could not read the photo"))), "image/jpeg", quality),
+    );
+  const blob = await encode(0.88);
+  return blob.size <= MAX_BYTES ? blob : encode(0.7);
+}
+
 async function blobToBase64(blob: Blob): Promise<string> {
   const buf = new Uint8Array(await blob.arrayBuffer());
   let bin = "";
@@ -176,9 +201,8 @@ export async function analyze(mode: AIMode, input: AnalyzeInput): Promise<Plan> 
     });
   }
   if (mode === "server") {
-    const image = input.photo
-      ? { data: await blobToBase64(input.photo), mediaType: input.photo.type || "image/jpeg" }
-      : undefined;
+    const photo = input.photo ? await shrinkPhoto(input.photo) : null;
+    const image = photo ? { data: await blobToBase64(photo), mediaType: photo.type } : undefined;
     return viaServer("/api/analyze", { text: input.text, image, today }, parsePlan);
   }
   throw new AIUnavailableError();
