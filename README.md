@@ -1,4 +1,4 @@
-<h1 align="center">🚀 Liftoff</h1>
+<h1 align="center"> Liftoff</h1>
 
 <p align="center"><b>Every recovery needs a launchpad.</b></p>
 
