@@ -5,6 +5,9 @@ import { useNow, usePersistentState, useTrace, useUI } from "../lib/context";
 import { addDays, daysBetween, formatClock, formatShortDate, fromISODate } from "../lib/dates";
 import { LANGUAGES } from "../lib/i18n";
 import { checklistFor } from "../lib/schedule";
+import { flagsFor, rulesFromPlan, type CheckIn, type CheckInLog } from "../lib/checkin";
+import { CheckInCard } from "./CheckIn";
+import { VisitSummary } from "./VisitSummary";
 import { Checklist, type Progress } from "./Checklist";
 import { FlightProfile } from "./FlightProfile";
 import { HelpPanel } from "./HelpPanel";
@@ -32,6 +35,8 @@ export function Dashboard(props: {
   langAvailable: (code: string) => boolean;
   translating: boolean;
   onReset: () => void;
+  /** Check-ins to start from (the sample patient's earlier days). */
+  sampleLog: CheckInLog | null;
 }) {
   const { plan } = props;
   const { t, locale } = useUI();
@@ -45,8 +50,25 @@ export function Dashboard(props: {
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
   const key = planKey(plan, props.doc);
-  const [allProgress, setAllProgress] = usePersistentState<Record<number, Progress>>(`liftoff:v1:${key}`, {});
+  // The sample patient starts with earlier days already ticked off.
+  const [allProgress, setAllProgress] = usePersistentState<Record<number, Progress>>(
+    `liftoff:v1:${key}`,
+    props.sampleLog
+      ? Object.fromEntries(
+          Array.from({ length: today }, (_, d) => [
+            d,
+            Object.fromEntries(checklistFor(plan, d).map((i) => [i.key, i.count])),
+          ]),
+        )
+      : {},
+  );
   const progress = allProgress[selectedDay] ?? {};
+
+  const [log, setLog] = usePersistentState<CheckInLog>(`liftoff:v1:${key}:log`, props.sampleLog ?? {});
+  const setEntry = (day: number, entry: CheckIn) => setLog((l) => ({ ...l, [day]: entry }));
+  const rules = useMemo(() => rulesFromPlan(plan), [plan]);
+  const flags = useMemo(() => flagsFor(log, rules), [log, rules]);
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const setProgress = (itemKey: string, value: number) =>
     setAllProgress((p) => ({ ...p, [selectedDay]: { ...(p[selectedDay] ?? {}), [itemKey]: value } }));
 
@@ -171,6 +193,7 @@ export function Dashboard(props: {
             selectedDay={selectedDay}
             discharge={discharge}
             dayDone={dayDone}
+            flagDays={[...new Set(flags.map((f) => f.day))]}
             onSelectDay={setSelectedDay}
           />
         </section>
@@ -185,6 +208,19 @@ export function Dashboard(props: {
             </button>
           </div>
         )}
+
+        <CheckInCard
+          plan={plan}
+          day={selectedDay}
+          today={today}
+          discharge={discharge}
+          log={log}
+          rules={rules}
+          flags={flags}
+          isSample={Boolean(props.sampleLog)}
+          onChange={setEntry}
+          onOpenSummary={() => setSummaryOpen(true)}
+        />
 
         <div className="instruments">
           <Checklist
@@ -206,6 +242,17 @@ export function Dashboard(props: {
 
       <PapersPanel text={props.doc} sources={props.paperSources} />
       <TraceLayer tones={tones} />
+      {summaryOpen && (
+        <VisitSummary
+          plan={plan}
+          today={today}
+          discharge={discharge}
+          log={log}
+          flags={flags}
+          progress={allProgress}
+          onClose={() => setSummaryOpen(false)}
+        />
+      )}
       {toast && (
         <div className="toast" role="status">
           <RocketGlyph size={20} /> {toast}

@@ -10,6 +10,7 @@
     "server": "tsx server/index.ts",
     "build": "tsc --noEmit && vite build",
     "build:artifact": "vite build --mode artifact && node scripts/make-artifact.mjs",
+    "build:pages": "vite build --mode pages",
     "start": "NODE_ENV=production tsx server/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test src/lib/*.test.ts",

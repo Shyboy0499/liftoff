@@ -20,8 +20,9 @@ import { toISODate } from "./dates";
 //  - "artifact": published on claude.ai, using the viewer's own Claude
 //    through the artifact runtime's `sample` capability;
 //  - "server":   the Node server in /server with an Anthropic API key;
-//  - "offline":  no AI. The sample papers use the saved result and the
-//                symptom check falls back to keyword matching.
+//  - "offline":  no AI (e.g. the public GitHub Pages site). The sample
+//                papers use the saved result and the symptom check falls
+//                back to keyword matching.
 
 export type AIMode = "artifact" | "server" | "offline";
 
@@ -64,6 +65,7 @@ function artifactSample(): Promise<SampleFn | null> {
 
 export async function detectMode(): Promise<AIMode> {
   if (__ARTIFACT__) return (await artifactSample()) ? "artifact" : "offline";
+  if (__STATIC__) return "offline"; // public website: no API server behind it
   try {
     const res = await fetch("/api/health");
     if (res.ok && (await res.json()).ai === true) return "server";
