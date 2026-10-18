@@ -14,7 +14,7 @@ import { EN, ES, LANGUAGES, type UIKey, type UIStrings } from "./lib/i18n";
 import { applyPlanStrings, planStrings } from "./lib/translate";
 import { toneForSource } from "./lib/tones";
 import { inDocumentOrder, verifyPlan } from "./lib/verify";
-import { sampleDocument, samplePlan } from "./data/sample";
+import { sampleCheckIns, sampleDocument, samplePlan } from "./data/sample";
 import { sampleSpanish } from "./data/sample.es";
 import { Dashboard } from "./components/Dashboard";
 import { Landing, type ScanInput } from "./components/Landing";
@@ -176,6 +176,7 @@ export default function App() {
             langAvailable={langAvailable}
             translating={translating}
             onReset={reset}
+            sampleLog={loaded.isSample ? sampleCheckIns() : null}
           />
         </TraceProvider>
       )}

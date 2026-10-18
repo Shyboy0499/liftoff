@@ -19,6 +19,8 @@ export function FlightProfile(props: {
   selectedDay: number;
   discharge: Date;
   dayDone: boolean;
+  /** Days with a check-in alert, marked on the path. */
+  flagDays: number[];
   onSelectDay: (day: number) => void;
 }) {
   const { plan, today } = props;
@@ -178,6 +180,18 @@ export function FlightProfile(props: {
             </g>
           );
         })}
+
+        {props.flagDays
+          .filter((d) => d <= N)
+          .map((d) => (
+            <g key={d} className="flag-pin" transform={`translate(${x(d)} ${y(d)})`}>
+              <line y1={0} y2={14} />
+              <circle cy={20} r={7} />
+              <text y={24} textAnchor="middle">
+                !
+              </text>
+            </g>
+          ))}
 
         {Array.from({ length: N + 1 }, (_, d) => (
           <rect

@@ -256,6 +256,26 @@ await beat(1800);
 await click(page.locator(".preview-bar button"));
 await beat(600);
 
+await caption("A <b>daily check-in</b>: pain, temperature and bowel movements, in a few taps.");
+await scrollTo(page.locator(".checkin"), "start");
+await click(page.locator(".pain-step").nth(4));
+await beat(400);
+await click(page.locator("#temp-input"));
+await page.keyboard.type("101.6", { delay: 90 });
+await beat(300);
+await click(page.locator("#bowel-yes"));
+await beat(900);
+await caption("Code compares them with the papers' own warning signs. A fever over 101°F gets <b>flagged</b>, with the exact line.");
+await moveTo(page.locator(".log-point.is-over"));
+await beat(1800);
+await moveTo(page.locator(".checkin-alert .source-chip"));
+await beat(2200);
+await caption("One tap turns the log into a <b>summary for the follow-up visit</b>.");
+await click(page.locator("#summary-button"));
+await beat(3400);
+await click(page.locator(".visit-head .icon-btn"));
+await beat(500);
+
 await caption("Today's checklist: tick things off and the <b>fuel bar</b> fills up.");
 await scrollTo(page.locator(".checklist"), "start");
 const ticks = page.locator("button.tick:not([disabled])");
@@ -337,7 +357,7 @@ await scrollTop();
 await beat(3400);
 
 await card(
-  `<div>${ROCKET}<h1 style="font-size:110px">LIFTOFF</h1><h2>Every recovery needs a launchpad.</h2><ul><li>Claude turns discharge papers into a day-by-day plan</li><li>Code checks every item against the original words</li><li>Pill clock · warning signs · symptom check · 5 languages</li></ul><p class="k" style="font-size:15px;margin-top:30px">Built for DSH Hacks V2 · Demo uses a fictional patient</p></div>`,
+  `<div>${ROCKET}<h1 style="font-size:110px">LIFTOFF</h1><h2>Every recovery needs a launchpad.</h2><ul><li>Claude turns discharge papers into a day-by-day plan</li><li>Code checks every item against the original words</li><li>Daily check-in with alerts from the papers · pill clock · 5 languages</li></ul><p class="k" style="font-size:15px;margin-top:30px">Built for DSH Hacks V2 · Demo uses a fictional patient</p></div>`,
   5200,
   { stay: true },
 );

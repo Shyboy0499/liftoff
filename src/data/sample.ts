@@ -1,4 +1,5 @@
 import type { Plan } from "../lib/schema";
+import type { CheckInLog } from "../lib/checkin";
 import { addDays, toISODate } from "../lib/dates";
 
 // A fictional discharge sheet used for the demo. The dates move with the
@@ -360,5 +361,13 @@ export function samplePlan(now = new Date()): Plan {
         quote: "The skin tapes (Steri-Strips) will fall off on their own in 7 to 10 days.",
       },
     ],
+  };
+}
+
+/** Check-ins the sample patient "already logged" on days 0 and 1. */
+export function sampleCheckIns(): CheckInLog {
+  return {
+    0: { pain: 6, tempF: 99.4, bowel: "no" },
+    1: { pain: 5, tempF: 99.1, bowel: "no" },
   };
 }

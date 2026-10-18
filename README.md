@@ -13,8 +13,9 @@ and links it to the exact line the care team wrote.
 </p>
 
 <p align="center">
-  <a href="demo/liftoff-demo.mp4"><b>▶ Full demo video (1:53)</b></a> ·
-  <a href="https://claude.ai/artifact/RoZ9BRWdM69ZtuBqcP3e76"><b>Live demo</b></a> ·
+  <a href="https://shyboy0499.github.io/dsh-hacks-2.0/"><b>🌐 Try it (no login)</b></a> ·
+  <a href="demo/liftoff-demo.mp4"><b>▶ Demo video (2:05)</b></a> ·
+  <a href="https://claude.ai/artifact/RoZ9BRWdM69ZtuBqcP3e76"><b>Live AI version</b></a> ·
   <a href="docs/DEVPOST.md"><b>Devpost write-up</b></a>
 </p>
 
@@ -48,19 +49,29 @@ A "flight profile" runs from discharge to full activity, with the papers' milest
 
 ![Dashboard](docs/screenshots/dashboard.png)
 
-### 4. See where anything came from
+### 4. Check in every day
+
+Log pain, temperature and bowel movements in a few taps. Liftoff charts them and compares them with the warning signs written in the papers, using plain code, not AI. A temperature over the papers' 101°F limit, pain that keeps going up, or 3 days without a bowel movement raises an alert that quotes the exact line and shows who to call.
+
+![Daily check-in with a fever alert](docs/screenshots/checkin.png)
+
+One tap turns the log into a **summary for the follow-up visit**: a day-by-day table of check-ins and doses, the alerts raised, and the questions to ask.
+
+![Follow-up visit summary](docs/screenshots/visit-summary.png)
+
+### 5. See where anything came from
 
 Tap **Source** on any item. The original papers slide in and a line traces the item to the highlighted sentence.
 
 ![Source trace](docs/screenshots/source-trace.png)
 
-### 5. Check a symptom against your own papers
+### 6. Check a symptom against your own papers
 
 Describe how you feel. Liftoff compares it only with the warning signs in your papers, quotes the line it matched and shows who to call. It never diagnoses.
 
 ![Symptom check](docs/screenshots/symptom-check.png)
 
-### 6. In your language, light or dark, on any screen
+### 7. In your language, light or dark, on any screen
 
 Switch the plan to Spanish, Chinese, Vietnamese or Tagalog. The quotes stay in the original so the source check still holds. Today's list can also be read aloud.
 
@@ -82,6 +93,7 @@ flowchart LR
 - **One schema, two AI paths.** `src/lib/schema.ts` defines the plan with Zod. The Node server uses it for Claude structured outputs (`server/index.ts`). The live claude.ai demo sends the same prompt through the viewer's own Claude and checks the reply against the same schema (`src/lib/ai.ts`).
 - **Photos.** The browser shrinks a photo to at most 2576 px on the long edge (the most Claude reads) and sends it to Claude, which writes out the text it sees. The source check then runs against that text.
 - **The source check is deterministic.** `src/lib/verify.ts` compares letters and digits only, so line breaks and punctuation don't hide a match, but changed words or numbers do.
+- **Check-in alerts are deterministic too.** `src/lib/checkin.ts` reads the limits out of the papers' warning signs (for example "Fever higher than 101°F", "No bowel movement for 3 days") and compares each day's log with them.
 
 ## Set up your API key
 
@@ -104,6 +116,10 @@ Liftoff runs without a key, but then only the built-in sample papers work (using
 
 ## Run it
 
+The quickest way is the public website: **https://shyboy0499.github.io/dsh-hacks-2.0/**. It runs without AI, so the sample papers, check-in, charts and visit summary all work, but scanning your own papers needs the setup below.
+
+To run it yourself:
+
 ```bash
 npm install
 npm run dev        # web on http://localhost:5173, API on :8787
@@ -113,10 +129,11 @@ With no `.env`, the app still runs: the sample papers work end to end, and the P
 
 | Command | What it does |
 |---|---|
-| `npm test` | Unit tests: source check, schedule, symptom matcher, translation, plan parsing |
+| `npm test` | Unit tests: source check, check-in rules, schedule, symptom matcher, translation, plan parsing |
 | `npm run typecheck` | TypeScript check for app and server |
 | `npm run build && npm start` | Production build served by the API server on :8787 |
 | `npm run build:artifact` | Single-file build (`dist-artifact/liftoff.html`) for publishing as a claude.ai artifact |
+| `npm run build:pages` | Static build of the public website (`dist-pages/`); `.github/workflows/pages.yml` deploys it to GitHub Pages on every push to `main` |
 | `npm run demo:record` | Records the demo video to `demo/liftoff-demo.mp4` (needs ffmpeg; run `npm run build` first) |
 
 The included video uses the saved sample result. To record it with a live Claude result, set up your key, run `npm run build && npm start`, then `npm run demo:record -- --url http://localhost:8787`.
@@ -130,7 +147,8 @@ src/lib/prompts.ts        Prompts, shared by server and artifact
 src/lib/verify.ts         Source check: find each quote in the papers
 src/lib/ai.ts             Picks artifact runtime, server, or offline mode; shrinks photos
 src/lib/schedule.ts       Turns the plan into a day's checklist, doses, countdowns
-src/components/           Landing, scan, flight profile, checklist, pill clock, papers panel…
+src/lib/checkin.ts        Daily check-in rules, read from the papers' warning signs
+src/components/           Landing, scan, flight profile, check-in, checklist, pill clock, papers panel…
 src/data/sample.ts        Fictional sample papers + saved result
 scripts/record-demo.mjs   Scripted demo recording (Playwright + ffmpeg)
 ```

@@ -21,6 +21,8 @@ Liftoff reads discharge papers (pasted text or a photo) and builds a recovery pl
 - **Recovery path:** a "flight profile" from discharge day to full activity, with milestones from the papers (shower OK, back to school, follow-up visit, sports OK) and a rocket at today.
 - **Today's checklist:** doses and tasks by time of day, with counters for repeated tasks like walks and glasses of water. Finishing the day fires the rocket.
 - **Pill clock:** a 24-hour dial with every dose and a countdown to the next one.
+- **Daily check-in:** log pain, temperature and bowel movements in a few taps. Liftoff charts them against the limits in the papers. A fever over the papers' 101°F limit, pain that keeps rising, or 3 days without a bowel movement raises an alert that quotes the line and shows who to call.
+- **Visit summary:** one tap turns the log into a summary for the follow-up appointment: check-ins, doses taken, alerts and open questions.
 - **When to get help:** the papers' own 911 signs and call-your-doctor signs, with the clinic numbers.
 - **Symptom check:** type how you feel and Liftoff checks it only against the warning signs in your papers, quoting the line it matched.
 - **Questions for the care team:** when the papers are unclear, Liftoff writes a question instead of guessing.
@@ -33,7 +35,9 @@ The key feature is the **source check**. Claude has to attach an exact quote fro
 - **Claude** turns the papers into a structured JSON plan. The plan schema is written once in Zod and used two ways: the Node/Express server sends it to the Anthropic API as a structured-output format, and the published claude.ai artifact validates replies from the viewer's own Claude against the same schema.
 - **The source check** compares letters and digits only, so line breaks and punctuation in the papers don't break a match, but a changed word or number does.
 - **Frontend:** React, TypeScript and Vite. The flight profile and pill clock are hand-drawn SVG; the trace line is an SVG overlay that follows the item and the highlighted text as you scroll.
+- **Check-in alerts** follow the same rule as the source check: code, not AI, decides. Liftoff reads the limits straight out of the papers' warning signs ("Fever higher than 101°F", "No bowel movement for 3 days") and compares each day's log with them.
 - **Offline mode:** with no API key, the sample papers load a saved result with the same shape, so the demo always works.
+- **Public website:** a GitHub Actions workflow builds a static version and publishes it to GitHub Pages, so anyone can try it without logging in.
 - **Demo video:** recorded with a Playwright script that drives the app, adds captions and a cursor, and pipes frames to ffmpeg.
 
 ## Challenges I ran into
@@ -47,6 +51,7 @@ The key feature is the **source check**. Claude has to attach an exact quote fro
 
 - Every item in the sample plan (29 of 29) traces back to a real line on the papers, and anything that doesn't would be flagged automatically.
 - The trace line from a plan item to the highlighted sentence makes the safety check visible instead of hidden.
+- The daily check-in closes the loop: the same papers that made the plan also decide when a symptom needs a call, and the visit summary brings everything back to the care team.
 - It works on phones, in light and dark mode, and with no API key for the demo.
 
 ## What I learned
@@ -57,14 +62,14 @@ The key feature is the **source check**. Claude has to attach an exact quote fro
 ## What's next
 
 - Test with real (de-identified) discharge papers from several kinds of stays.
-- Reminders for doses and tasks.
+- Reminders for doses, tasks and the daily check-in.
 - A caregiver view so family members can help track recovery.
 - More languages and better read-aloud voices.
 - Export a one-page summary to bring to the follow-up visit.
 
 ## Built with
 
-React · TypeScript · Vite · Node.js · Express · Zod · Claude (Anthropic API, structured outputs) · Playwright · ffmpeg
+React · TypeScript · Vite · Node.js · Express · Zod · Claude (Anthropic API, structured outputs + vision) · GitHub Pages · GitHub Actions · Playwright · ffmpeg
 
 ---
 
