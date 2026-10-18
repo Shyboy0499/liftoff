@@ -13,7 +13,7 @@ and links it to the exact line the care team wrote.
 </p>
 
 <p align="center">
-  <a href="https://shyboy0499.github.io/dsh-hacks-2.0/"><b>🌐 Try it (no login)</b></a> ·
+  <a href="https://shyboy0499.github.io/liftoff/"><b>🌐 Try it (no login)</b></a> ·
   <a href="demo/liftoff-demo.mp4"><b>▶ Demo video (2:05)</b></a> ·
   <a href="https://claude.ai/artifact/RoZ9BRWdM69ZtuBqcP3e76"><b>Live AI version</b></a> ·
   <a href="docs/DEVPOST.md"><b>Devpost write-up</b></a>
@@ -116,7 +116,7 @@ Liftoff runs without a key, but then only the built-in sample papers work (using
 
 ## Run it
 
-The quickest way is the public website: **https://shyboy0499.github.io/dsh-hacks-2.0/**. It runs without AI, so the sample papers, check-in, charts and visit summary all work, but scanning your own papers needs the setup below.
+The quickest way is the public website: **https://shyboy0499.github.io/liftoff/**. It runs without AI, so the sample papers, check-in, charts and visit summary all work, but scanning your own papers needs the setup below.
 
 To run it yourself:
 
